@@ -9,11 +9,10 @@ fn main() {
 	let mut cflags = env::var("CFLAGS").unwrap_or(String::new());
 
 	let host = env::var("HOST").unwrap();
-
 	let target = env::var("TARGET").unwrap();
 	
-	let msvc = host.contains("windows") && target.contains("windows");
-	let mingw = !msvc && target.contains("windows");
+	let mingw =  target.contains("windows-gnu");
+	let msvc = !mingw && host.contains("windows") && target.contains("windows");
 
 
 
@@ -39,7 +38,10 @@ fn main() {
 			_ => "Debug",
 		};
 
-		if msvc {
+
+ 		if mingw {
+			cmd.arg("-G").arg("MinGW Makefiles");
+		} else if msvc {
 			// It's nessasary for 64bit build.
 			// vs 12 2014 requires 'CMAKE_C_COMPILER'
 			if target.contains("x86_64") { 
@@ -47,8 +49,6 @@ fn main() {
 			} else {
 				cmd.arg("-G").arg("Visual Studio 14 2015");
 			}
-		} else if mingw {
-			cmd.arg("-G").arg("MinGW Makefiles");
 		}
 		
 
