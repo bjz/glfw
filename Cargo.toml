@@ -15,3 +15,10 @@ license = "Zlib/Libpng"
 [lib]
 name = "glfw_sys"
 path = "lib.rs"
+
+[dependencies]
+libc = "*"
+
+
+[build-dependencies]
+bt = "*"
