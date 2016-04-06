@@ -104,15 +104,12 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 @endcode
 
 The action is one of `GLFW_PRESS`, `GLFW_REPEAT` or `GLFW_RELEASE`.  The key
-will be `GLFW_KEY_UNKNOWN` if GLFW lacks a key token for it.  These keys still
-have unique, if platform-specific scancodes.
+will be `GLFW_KEY_UNKNOWN` if GLFW lacks a key token for it, for example
+_E-mail_ and _Play_ keys.
 
-The scancode is unique for every key but is platform-specific, so a scancode
-will map to different keys on different platforms.
-
-The key will be `GLFW_KEY_UNKNOWN` for special keys like _E-mail_ or _Play_ that
-don't have a key token.  Those keys will still have unique, if platform-specific
-scancodes.
+The scancode is unique for every key, regardless of whether it has a key token.
+Scancodes are platform-specific but consistent over time, so keys will have
+different scancodes depending on the platform but they are safe to save to disk.
 
 Key states for [named keys](@ref keys) are also saved in per-window state arrays
 that can be polled with @ref glfwGetKey.
@@ -299,8 +296,9 @@ GLFWcursor* cursor = glfwCreateCursor(&image, 0, 0);
 If cursor creation fails, `NULL` will be returned, so it is necessary to check
 the return value.
 
-The image data is 32-bit RGBA, i.e. eight bits per channel.  The pixels are
-arranged canonically as sequential rows, starting from the top-left corner.
+The image data is 32-bit, little-endian, non-premultiplied RGBA, i.e. eight bits
+per channel.  The pixels are arranged canonically as sequential rows, starting
+from the top-left corner.
 
 
 @subsubsection cursor_standard Standard cursor creation
@@ -546,8 +544,13 @@ converted to one, you can retrieve it with @ref glfwGetClipboardString.  See the
 reference documentation for the lifetime of the returned string.
 
 @code
-const char* clipboard = glfwGetClipboardString(window);
+const char* text = glfwGetClipboardString(window);
+if (text)
+    insert_text(text);
 @endcode
+
+If the clipboard is empty or if its contents could not be converted, `NULL` is
+returned.
 
 The contents of the system clipboard can be set to a UTF-8 encoded string with
 @ref glfwSetClipboardString.

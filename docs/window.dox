@@ -134,9 +134,7 @@ you wish to have the specified attributes.
 Some window hints are hard constraints.  These must match the available
 capabilities _exactly_ for window and context creation to succeed.  Hints
 that are not hard constraints are matched as closely as possible, but the
-resulting window and context may differ from what these hints requested.  To
-find out the actual attributes of the created window and context, use the
-@ref glfwGetWindowAttrib function.
+resulting context and framebuffer may differ from what these hints requested.
 
 The following hints are always hard constraints:
 - `GLFW_STEREO`
@@ -151,30 +149,30 @@ context, but are ignored when requesting an OpenGL ES context:
 
 @subsubsection window_hints_wnd Window related hints
 
-`GLFW_RESIZABLE` specifies whether the (windowed mode) window will be resizable
+`GLFW_RESIZABLE` specifies whether the windowed mode window will be resizable
 _by the user_.  The window will still be resizable using the @ref
 glfwSetWindowSize function.  This hint is ignored for full screen windows.
 
-`GLFW_VISIBLE` specifies whether the (windowed mode) window will be initially
+`GLFW_VISIBLE` specifies whether the windowed mode window will be initially
 visible.  This hint is ignored for full screen windows.
 
-`GLFW_DECORATED` specifies whether the (windowed mode) window will have window
-decorations such as a border, a close widget, etc.  This hint is ignored for
-full screen windows.  Note that even though a window may lack a close widget, it
-is usually still possible for the user to generate close events.
+`GLFW_DECORATED` specifies whether the windowed mode window will have window
+decorations such as a border, a close widget, etc.  An undecorated window may
+still allow the user to generate close events on some platforms.  This hint is
+ignored for full screen windows.
 
-`GLFW_FOCUSED` specifies whether the (windowed mode) window will be given input
+`GLFW_FOCUSED` specifies whether the windowed mode window will be given input
 focus when created.  This hint is ignored for full screen and initially hidden
 windows.
 
-`GLFW_AUTO_ICONIFY` specifies whether the (full screen) window will
+`GLFW_AUTO_ICONIFY` specifies whether the full screen window will
 automatically iconify and restore the previous video mode on input focus loss.
 This hint is ignored for windowed mode windows.
 
-`GLFW_FLOATING` specifies whether the window will be floating above other
-regular windows, also called topmost or always-on-top.  This is intended
-primarily for debugging purposes and cannot be used to implement proper full
-screen windows.  This hint is ignored for full screen windows.
+`GLFW_FLOATING` specifies whether the windowed mode window will be floating
+above other regular windows, also called topmost or always-on-top.  This is
+intended primarily for debugging purposes and cannot be used to implement proper
+full screen windows.  This hint is ignored for full screen windows.
 
 
 @subsubsection window_hints_fb Framebuffer related hints
@@ -208,6 +206,8 @@ Zero disables multisampling.  `GLFW_DONT_CARE` means the application has no
 preference.
 
 `GLFW_SRGB_CAPABLE` specifies whether the framebuffer should be sRGB capable.
+If supported, the created context will provide `GL_ARB_framebuffer_sRGB` or
+`GL_EXT_framebuffer_sRGB`.
 
 `GLFW_DOUBLEBUFFER` specifies whether the framebuffer should be double buffered.
 You nearly always want to use double buffering.  This is a hard constraint.
@@ -538,7 +538,7 @@ As long as your source file is encoded as UTF-8, you can use any Unicode
 characters directly in the source.
 
 @code
-glfwSetWindowTitle(window, "おもひでぽろぽろ");
+glfwSetWindowTitle(window, "プラネテス");
 @endcode
 
 
@@ -764,6 +764,37 @@ This is `GLFW_LOSE_CONTEXT_ON_RESET` or `GLFW_NO_RESET_NOTIFICATION` if the
 window's context supports robustness, or `GLFW_NO_ROBUSTNESS` otherwise.
 
 
+@subsubsection window_attribs_fb Framebuffer related attributes
+
+The attributes of the default framebuffer (i.e. the framebuffer attached to the
+window) are not provided by this function but can be queried with both OpenGL
+and OpenGL ES.
+
+If you are using version 3.0 or later of OpenGL or OpenGL ES, the
+`glGetFramebufferAttachmentParameteriv` function can be used to retrieve the
+number of bits for the red, green, blue, alpha, depth and stencil buffer
+channels.  Otherwise, the `glGetIntegerv` function can be used.
+
+The number of MSAA samples are always retrieved with `glGetIntegerv`.  For
+contexts supporting framebuffer objects, the number of samples of the currently
+bound framebuffer is returned.
+
+Attribute    | glGetIntegerv     | glGetFramebufferAttachmentParameteriv
+------------ | ----------------- | -------------------------------------
+Red bits     | `GL_RED_BITS`     | `GL_FRAMEBUFFER_ATTACHMENT_RED_SIZE`
+Green bits   | `GL_GREEN_BITS`   | `GL_FRAMEBUFFER_ATTACHMENT_GREEN_SIZE`
+Blue bits    | `GL_BLUE_BITS`    | `GL_FRAMEBUFFER_ATTACHMENT_BLUE_SIZE`
+Alpha bits   | `GL_ALPHA_BITS`   | `GL_FRAMEBUFFER_ATTACHMENT_ALPHA_SIZE`
+Depth bits   | `GL_DEPTH_BITS`   | `GL_FRAMEBUFFER_ATTACHMENT_DEPTH_SIZE`
+Stencil bits | `GL_STENCIL_BITS` | `GL_FRAMEBUFFER_ATTACHMENT_STENCIL_SIZE`
+MSAA samples | `GL_SAMPLES`      | _Not provided by this function_
+
+When calling `glGetFramebufferAttachmentParameteriv`, the red, green, blue and
+alpha sizes can be queried from the `GL_BACK_LEFT`, while the depth and stencil
+sizes can be queried from the `GL_DEPTH` and `GL_STENCIL` attachments,
+respectively.
+
+
 @section buffer_swap Buffer swapping
 
 GLFW windows are by default double buffered.  That means that you have two
@@ -796,8 +827,6 @@ interval of one lets you avoid tearing.
 
 Note that this may not work on all machines, as some drivers have
 user-controlled settings that override any swap interval the application
-requests.  It is also by default disabled on Windows Vista and later when using
-DWM (Aero), as using it there sometimes leads to severe jitter.  You can
-forcibly enable it for machines using DWM using @ref compile_options_win32.
+requests.
 
 */
