@@ -80,3 +80,6 @@ tests/version
 tests/vulkan
 tests/windows
 
+# Cargo
+/Cargo.lock
+/target
