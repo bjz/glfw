@@ -2,7 +2,7 @@ extern crate cmake;
 use cmake::Config;
 
 fn main() {
-    let mut cfg = Config::new("glfw");
+    let mut cfg = Config::new(".");
 
     cfg.define("GLFW_BUILD_EXAMPLES", "OFF")
         .define("GLFW_BUILD_TESTS", "OFF")
@@ -10,9 +10,9 @@ fn main() {
         .define("CMAKE_INSTALL_LIBDIR", "lib");
 
     let dst = if cfg!(feature = "wayland") {
-        cfg.define("GLFW_USE_WAYLAND", "ON").build()
+        cfg.define("GLFW_BUILD_WAYLAND", "ON").build()
     } else {
-        cfg.define("GLFW_USE_WAYLAND", "OFF").build()
+        cfg.define("GLFW_BUILD_WAYLAND", "OFF").build()
     };
 
     println!(
